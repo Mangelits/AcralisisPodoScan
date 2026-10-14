@@ -1,0 +1,65 @@
+# === Acralis AI · orquestación local de desarrollo ===
+# Levanta los tres microservicios + los emuladores de Firebase con un solo comando:
+#   docker compose up --build
+#
+# Puertos expuestos en el host:
+#   MS1 (ingesta)          -> http://localhost:8001
+#   MS2 (procesamiento/IA) -> http://localhost:8002
+#   MS3 (frontend Vite)    -> http://localhost:5173
+#   Firebase Emulator UI   -> http://localhost:4000
+
+services:
+  ms1-ingesta:
+    build: ./ms1-ingesta
+    container_name: acralis-ms1
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./ms1-ingesta:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    depends_on:
+      - firebase-emulators
+
+  ms2-procesamiento:
+    build: ./ms2-procesamiento
+    container_name: acralis-ms2
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    volumes:
+      - ./ms2-procesamiento:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+    depends_on:
+      - firebase-emulators
+
+  ms3-frontend:
+    build: ./ms3-frontend
+    container_name: acralis-ms3
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    volumes:
+      - ./ms3-frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+  firebase-emulators:
+    build: ./infra/firebase
+    container_name: acralis-firebase
+    ports:
+      - "4000:4000"   # Emulator UI
+      - "8080:8080"   # Firestore
+      - "9099:9099"   # Authentication
+      - "9199:9199"   # Storage
+    volumes:
+      - ./infra/firebase:/firebase
+      - ./infra/firebase/emulator-data:/firebase/emulator-data
+    working_dir: /firebase
+    command: >
+      firebase emulators:start
+      --project ${FIREBASE_PROJECT_ID:-acralis-dev}
+      --import=./emulator-data --export-on-exit=./emulator-data

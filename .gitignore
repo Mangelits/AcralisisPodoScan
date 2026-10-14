@@ -1,0 +1,60 @@
+# === Sistema operativo ===
+.DS_Store
+Thumbs.db
+
+# === Secretos y entorno ===
+.env
+.env.local
+*.local
+# Claves de servicio de Firebase / Google Cloud (NUNCA subir)
+**/serviceAccount*.json
+**/firebase-adminsdk*.json
+.firebaserc.local
+
+# === Python (MS1, MS2) ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# === Modelos y datos (pesados, no van al repo) ===
+*.pt
+*.pth
+*.onnx
+*.h5
+*.ckpt
+data/raw/
+data/processed/
+datasets/
+!**/.gitkeep
+
+# === Node / Vite (MS3) ===
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === Firebase emuladores ===
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+storage-debug.log
+emulator-data/
+
+# === Editores ===
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

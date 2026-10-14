@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Reglas de seguridad de Firestore (tarea 8.1).
+// Punto de partida restrictivo: nada es accesible sin autenticación y cada
+// profesional solo accede a sus propios pacientes. Se endurecen en el bloque 8.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Por defecto: denegar todo.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Pacientes: solo el profesional propietario (campo ownerId).
+    match /patients/{patientId} {
+      allow read, write: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
