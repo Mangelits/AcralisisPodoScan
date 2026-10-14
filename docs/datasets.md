@@ -20,6 +20,7 @@
 | Nevus acral benigno | DERM12345, BCN20000 | ✅ DERM12345 · 🔬 BCN20000 en evaluación |
 | Melanoma subungueal / lesiones ungueales | BCN20000 (uñas/mucosa, sin itemizar) | 🔬 en evaluación |
 | Hematoma / traumatismo | — | 🔎 por buscar |
+| Preentreno general de melanoma | HAM10000 | 🟡 opcional, baja prioridad |
 
 ---
 
@@ -121,6 +122,38 @@
 - **Duplicados:** colección de ISIC, igual que DERM12345 → controlar solapamiento
   y duplicados en la limpieza (tarea 2.2).
 - **No cubre** la clase traumatismo/hematoma.
+
+### 3. HAM10000 — *opcional, baja prioridad*
+
+- **Origen:** Tschandl, Rosendahl & Kittler. Benchmark clásico de lesiones
+  pigmentadas comunes, multi-fuente. Base de muchas colecciones de ISIC.
+- **Referencia:** Tschandl, P., Rosendahl, C. & Kittler, H. *The HAM10000 dataset…*
+  **Scientific Data** 5, 180161 (2018).
+- **Modalidad:** imágenes dermatoscópicas (PNG). ~**10.015 imágenes**.
+- **Clases y conteos:** nv 6.705 · **mel 1.113** · bkl 1.099 · bcc 514 ·
+  akiec 327 · vasc 142 · df 115.
+- **Localización:** el CSV de metadatos incluye el campo `localization` con el
+  valor `acral` (y `foot`, `hand`) → filtrable, pero con **muy pocos casos acrales**
+  (cifra exacta **a verificar en el CSV**).
+- **Licencia:** ⚠️ **verificar en origen.** El HAM10000 **oficial**
+  (Harvard Dataverse / ISIC) es **CC BY-NC 4.0 (no comercial)**. El registro de
+  Zenodo indicado es un **re-archivo de un tercero** que declara CC BY 4.0 →
+  usar la fuente oficial y asumir CC BY-NC salvo confirmación.
+- **Enlaces:**
+  - Zenodo (re-archivo): https://zenodo.org/records/17702692
+  - Fuente oficial (Harvard Dataverse): https://doi.org/10.7910/DVN/DBW86T
+  - Paper: https://doi.org/10.1038/sdata.2018.161
+
+#### Por qué baja prioridad
+
+- **No es acral-específico:** subconjunto acral mínimo; aporta poco al cuello de
+  botella de melanoma acral.
+- **Solapamiento/duplicados:** es una de las bases de ISIC; DERM12345 y BCN20000
+  ya son derivados de ISIC → alto riesgo de imágenes repetidas entre los tres.
+  Dedup obligatorio y control de que una lesión no caiga en train y test (tareas 2.2, 2.3).
+- **No cubre** trauma/hematoma ni lesiones ungueales como tales.
+- **Uso razonable:** solo como bolsa de **preentreno general** de melanoma, desde
+  la fuente oficial y con dedup estricto.
 
 ---
 
