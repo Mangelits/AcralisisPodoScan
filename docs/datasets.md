@@ -45,21 +45,30 @@
 
 #### Imágenes acrales (relevantes para el proyecto)
 
-| Subclase | Mapeo a nuestra clase | Imágenes |
-|---|---|---:|
-| Melanoma acral lentiginoso (ALM) | Sospechoso de melanoma | 54 |
-| Melanoma acral nodular (ANM) | Sospechoso de melanoma | 78 |
-| **Subtotal melanoma acral maligno** | | **132** |
-| Nevus acral juncional | Benigno | 351 |
-| Nevus acral displásico juncional | Benigno | 212 |
-| Nevus acral compuesto | Benigno | 22 |
-| Nevus acral displásico compuesto | Benigno | 8 |
-| **Subtotal nevus acral benigno** | | **~593** |
-| **Total acral** | | **~725** |
+Cifras verificadas en `derm12345_supplemental.csv` (columna `label`) el 2026-10-21.
+
+| Subclase | `label` | Mapeo a nuestra clase | Imágenes (train / test) |
+|---|---|---|---:|
+| Melanoma acral lentiginoso (ALM) | `alm` | Sospechoso de melanoma | 60 |
+| Melanoma acral nodular (ANM) | `anm` | Sospechoso de melanoma | 76 |
+| **Subtotal melanoma acral maligno** | | | **136** |
+| Nevus acral juncional | `ajb` | Benigno | 426 (340 / 86) |
+| Nevus acral displásico juncional | `ajd` | Benigno | 288 (230 / 58) |
+| Nevus acral compuesto | `acb` | Benigno | 37 (30 / 7) |
+| Nevus acral displásico compuesto | `acd` | Benigno | 9 (7 / 2) |
+| **Subtotal nevus acral benigno** | | | **760** |
+| **Total acral** | | | **896** |
+
+El total coincide con `anatom_site_general = palms/soles` en `derm12345.csv`.
+Los nevus acrales pertenecen a 330 pacientes distintos.
+
+**Descarga:** `python3 scripts/datasets/download_derm12345.py` baja solo estas
+896 imágenes (en vez del bundle de 1,9 GB) a `data/raw/derm12345/` y genera
+`acral.csv` con `patient_id` y el split original del paper.
 
 #### Notas y riesgos
 
-- **Clase minoritaria crítica:** solo 132 melanomas acrales malignos → apoyarse
+- **Clase minoritaria crítica:** solo 136 melanomas acrales malignos → apoyarse
   en aumento de datos (tarea 2.4) y pesos por clase; combinar con más fuentes.
 - **Huecos:** no incluye hematoma/traumatismo ni lesiones ungueales/subungueales.
 - **Duplicados:** es subconjunto de ISIC; si se descarga ISIC por separado,

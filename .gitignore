@@ -32,7 +32,7 @@ htmlcov/
 *.ckpt
 data/raw/
 data/processed/
-datasets/
+/datasets/
 !**/.gitkeep
 
 # === Node / Vite (MS3) ===
