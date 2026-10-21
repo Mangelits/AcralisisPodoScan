@@ -74,6 +74,20 @@ Los nevus acrales pertenecen a 330 pacientes distintos.
 - **Duplicados:** es subconjunto de ISIC; si se descarga ISIC por separado,
   controlar duplicados en la limpieza (tarea 2.2).
 - **Sesgo:** población de un país/centro → anotar en "sesgos conocidos" (tarea 2.5).
+- **Sesgo de recorte (atajo), detectado 2026-10-21:** las imágenes con tamaño de
+  cámara habitual (768×576, 3264×2448, 4032×3024, 1920×1080, 2048×1536) son casi
+  todas nevus; las de tamaño irregular (recortadas a mano) son mayoritariamente
+  melanomas. Un modelo puede aprender "recortada = melanoma" en vez de la lesión.
+  Además el reparto cambia entre splits:
+
+  | Split | Melanomas recortados | Nevus recortados |
+  |---|---:|---:|
+  | train | 75 / 108 (69 %) | 40 / 607 (7 %) |
+  | test | 3 / 28 (11 %) | 12 / 153 (8 %) |
+
+  **Mitigación:** todas las imágenes pasan por el mismo recorte cuadrado centrado
+  en la lesión (`ms2-procesamiento/app/preprocessing.py`) y se reportan métricas
+  por subgrupo estándar/recortada (`notebooks/02_baseline_v2_derm12345.ipynb`).
 
 ### 2. BCN20000 — *en evaluación*
 
