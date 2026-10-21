@@ -23,6 +23,7 @@ import csv
 import json
 import sys
 import time
+import urllib.error
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -33,7 +34,9 @@ CSV_FILES = {
     "derm12345.csv": f"{DOI_BASE}/derm12345.csv",
     "derm12345_supplemental.csv": f"{DOI_BASE}/supplements/derm12345_supplemental.csv",
 }
+IMAGE_S3 = "https://isic-archive.s3.amazonaws.com/images/{}.jpg"
 IMAGE_API = "https://api.isic-archive.com/api/v2/images/{}/"
+USER_AGENT = "acralis-ai-dataset-script/1.0 (+https://github.com/Mangelits/AcralisisPodoScan)"
 
 # Etiquetas acrales del CSV suplementario.
 ACRAL_LABELS = {
@@ -50,11 +53,21 @@ DEFAULT_OUT = ROOT / "data" / "raw" / "derm12345"
 
 
 def fetch(url: str, timeout: int = 60) -> bytes:
-    """GET con reintentos y espera exponencial."""
+    """GET con reintentos y espera exponencial; comprueba que llega completo."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     for attempt in range(5):
         try:
-            with urllib.request.urlopen(url, timeout=timeout) as resp:
-                return resp.read()
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = resp.read()
+                expected = resp.headers.get("Content-Length")
+                if expected is not None and len(data) != int(expected):
+                    raise IOError(f"incompleto: {len(data)} de {expected} bytes")
+                return data
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404 or attempt == 4:
+                raise
+            # 429/503: el servidor pide frenar → esperar más.
+            time.sleep(10 * (attempt + 1) if exc.code in (429, 503) else 2 ** attempt)
         except Exception:
             if attempt == 4:
                 raise
@@ -89,15 +102,24 @@ def extract_image(zf: zipfile.ZipFile, isic_id: str, images_dir: Path) -> Path:
 
 
 def download_image(isic_id: str, images_dir: Path) -> tuple[str, Path]:
-    """Descarga una imagen; la salta si ya existe con el tamaño esperado."""
-    meta = json.loads(fetch(IMAGE_API.format(isic_id)))
-    full = meta["files"]["full"]
-    path = images_dir / f"{isic_id}{Path(full['url']).suffix}"
-    if path.exists() and path.stat().st_size == full["size"]:
+    """Descarga una imagen directamente de S3; la salta si ya está.
+
+    Solo consulta la API de ISIC si la URL directa no existe (404).
+    El fichero se escribe como .part y se renombra al final, así que un
+    .jpg presente siempre está completo.
+    """
+    path = images_dir / f"{isic_id}.jpg"
+    if path.exists() and path.stat().st_size > 0:
         return isic_id, path
-    data = fetch(full["url"], timeout=300)
-    if len(data) != full["size"]:
-        raise IOError(f"{isic_id}: tamaño {len(data)} != {full['size']}")
+    try:
+        data = fetch(IMAGE_S3.format(isic_id), timeout=300)
+    except urllib.error.HTTPError as exc:
+        if exc.code != 404:
+            raise
+        meta = json.loads(fetch(IMAGE_API.format(isic_id)))
+        url = meta["files"]["full"]["url"]
+        path = images_dir / f"{isic_id}{Path(url).suffix}"
+        data = fetch(url, timeout=300)
     tmp = path.with_suffix(".part")
     tmp.write_bytes(data)
     tmp.rename(path)
