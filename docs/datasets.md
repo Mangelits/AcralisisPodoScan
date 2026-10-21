@@ -70,6 +70,15 @@ Los nevus acrales pertenecen a 330 pacientes distintos.
 
 - **Clase minoritaria crítica:** solo 136 melanomas acrales malignos → apoyarse
   en aumento de datos (tarea 2.4) y pesos por clase; combinar con más fuentes.
+- **Los 136 melanomas son solo 24 pacientes** (16 en el train del paper, 8 en el
+  test; un paciente aporta 22 imágenes). En la práctica hay ~24 casos
+  independientes de melanoma → un único split train/test es muy ruidoso. Se
+  evalúa con validación cruzada repetida por paciente
+  (`notebooks/03_repeated_cv_derm12345.ipynb`). Conseguir más **pacientes** con
+  melanoma acral es la prioridad de datos.
+- **Posible atajo de cámara:** 8 de los 28 melanomas del test son de 3264×2448,
+  una resolución que en train es casi siempre nevus. Se vigila con métricas por
+  cámara en el notebook 03.
 - **Huecos:** no incluye hematoma/traumatismo ni lesiones ungueales/subungueales.
 - **Duplicados:** es subconjunto de ISIC; si se descarga ISIC por separado,
   controlar duplicados en la limpieza (tarea 2.2).
